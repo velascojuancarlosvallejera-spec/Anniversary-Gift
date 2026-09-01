@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anniversary Gift ♥</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♥</text></svg>">
+  <style>
+    :root {
+      --primary-pink: #ff758f;
+      --soft-pink: #ffb3c1;
+      --light-pink: #fff0f3;
+      --accent-rose: #c9184a;
+      --dark-text: #4a3e3d;
+      --polaroid-bg: #ffffff;
+      --shadow: 0 10px 20px rgba(255, 117, 143, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--light-pink);
+      color: var(--dark-text);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    /* Floating Particles Canvas */
+    #heart-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 50px 20px 20px;
+    }
+
+    h1 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 3.5rem;
+      color: var(--accent-rose);
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #725d5b;
+      margin-bottom: 20px;
+    }
+
+    /* Filter Controls */
+    .filter-bar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .filter-btn {
+      background: white;
+      border: 1px solid var(--soft-pink);
+      color: var(--dark-text);
+      padding: 8px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: var(--primary-pink);
+      color: white;
+      border-color: var(--primary-pink);
+      box-shadow: var(--shadow);
+    }
+
+    /* Card Grid */
+    .grid-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 3D Flip Card Container */
+    .flip-card {
+      background-color: transparent;
+      height: 380px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+      transform-style: preserve-3d;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      background: var(--polaroid-bg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #ffe5ec;
+    }
+
+    /* Front side (Polaroid Photo) */
+    .card-front {
+      justify-content: space-between;
+    }
+
+    .photo-wrapper {
+      width: 100%;
+      height: 250px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--light-pink);
+    }
+
+    .photo-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card-caption {
+      margin-top: 10px;
+    }
+
+    .card-date {
+      font-size: 0.85rem;
+      color: var(--primary-pink);
+      font-weight: 600;
+    }
+
+    .card-hint {
+      font-size: 0.75rem;
+      color: #aaa;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* Back side (Letter) */
+    .card-back {
+      transform: rotateY(180deg);
+      background: #fff8f9;
+      justify-content: space-between;
+      text-align: left;
+    }
+
+    .letter-header {
+      font-size: 0.85rem;
+      color: var(--primary-pink);
+      font-weight: 600;
+      border-bottom: 1px dashed var(--soft-pink);
+      padding-bottom: 6px;
+    }
+
+    .letter-body {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.35rem;
+      color: #333;
+      line-height: 1.4;
+      margin: 12px 0;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    /* Music Floating Bar */
+    .music-player {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      background: white;
+      padding: 10px 18px;
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--soft-pink);
+    }
+
+    .music-btn {
+      background: var(--primary-pink);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="heart-canvas"></canvas>
+
+  <header>
+    <h1>Our Moments Together</h1>
+    <p class="subtitle">Click any photo to flip it over and read the note on the back.</p>
+  </header>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" onclick="filterMonth('All')">All Months</button>
+  </div>
+
+  <main class="grid-container" id="grid"></main>
+
+  <div class="music-player">
+    <button class="music-btn" id="play-btn">▶</button>
+    <span style="font-size: 0.85rem; font-weight: 500;">Our Song</span>
+    <audio id="bg-music" loop src="music/our-song.mp3" autoplay></audio>
+  </div>
+
+  <script>
+    // --- 1. EDIT YOUR MEMORIES HERE ---
+    const memories = [
+      {
+        month: "October",
+        date: "October 01, 2025",
+        image: "photos/oct-01.jpg",
+        letter: "Our very first photo together. I remember being so nervous before asking you out!"
+      },
+      {
+        month: "November",
+        date: "November 15",
+        image: "photos/nov-15.jpg",
+        letter: "Coffee date afternoon. We ended up talking until the café actually closed."
+      },
+      {
+        month: "December",
+        date: "December 10",
+        image: "photos/Dec-10.jpg",
+        letter: "A spontaneous road trip. You looked so happy sitting by the window seat."
+      },
+      {
+        month: "January",
+        date: "January 24",
+        image: "photos/jan-24.jpg",
+        letter: "Cooking dinner together and messing up the recipe, but it was still perfect."
+      },
+      {
+        month: "February",
+        date: "February 14",
+        image: "photos/feb-14.jpg",
+        letter: "Valentine's Day surprise! You caught me off guard with that bouquet."
+      },
+      {
+        month: "March",
+        date: "March 15",
+        image: "photos/mar-15.jpg",
+        letter: "A day at the park, laughing at the dog tricks."
+      },
+      {
+        month: "April",
+        date: "April 20",
+        image: "photos/apr-20.jpg",
+        letter: "A sunny day at the beach, with the waves crashing against the shore."
+      },
+      {
+        month: "May",
+        date: "May 10",
+        image: "photos/may-10.jpg",
+        letter: "A beautiful day in the countryside, with the sun shining and the flowers blooming."
+      },
+      {
+        month: "June",
+        date: "June 15",
+        image: "photos/jun-15.jpg",
+        letter: "A day at the zoo, seeing all the animals and having a picnic."
+      },
+      {
+        month: "July",
+        date: "July 20",
+        image: "photos/jul-20.jpg",
+        letter: "A day at the lake, enjoying the water and the sunshine."
+      },
+      {
+        month: "August",
+        date: "August 10",
+        image: "photos/aug-10.jpg",
+        letter: "A day at the mountains, hiking and enjoying the fresh air."
+      },
+      {
+        month: "September",
+        date: "September 15",
+        image: "photos/sep-15.jpg",
+        letter: "A day at the museum, seeing all the exhibits and having a picnic."
+      },
+      {
+        month: "October",
+        date: "October 1",
+        image: "photos/oct-01.jpg",
+        letter: "Our very first photo together. I remember being so nervous before asking you out!"
+      }
+    ];
+
+    const grid = document.getElementById('grid');
+    const filterBar = document.getElementById('filter-bar');
+
+    // Extract unique months for filter buttons
+    const months = ["All", ...new Set(memories.map(m => m.month))];
+
+    // Build Month Filter Buttons
+    months.forEach(month => {
+      if (month !== "All") {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.innerText = month;
+        btn.onclick = () => filterMonth(month, btn);
+        filterBar.appendChild(btn);
+      }
+    });
+
+    // Render Cards
+    function renderCards(data) {
+      grid.innerHTML = '';
+      data.forEach((item) => {
+        const card = document.createElement('div');
+        card.className = 'flip-card';
+        card.innerHTML = `
+          <div class="flip-card-inner">
+            <div class="card-front">
+              <div class="photo-wrapper">
+                <img src="${item.image}" alt="${item.date}">
+              </div>
+              <div class="card-caption">
+                <span class="card-date">${item.date}</span>
+                <span class="card-hint">Click to flip ↺</span>
+              </div>
+            </div>
+            <div class="card-back">
+              <div class="letter-header">Memory from ${item.date}</div>
+              <p class="letter-body">"${item.letter}"</p>
+            </div>
+          </div>
+        `;
+        
+        // Flip toggle and trigger hearts burst on click
+        card.onclick = (e) => {
+          card.classList.toggle('flipped');
+          triggerHeartBurst(e.clientX, e.clientY);
+        };
+
+        grid.appendChild(card);
+      });
+    }
+
+    // Filter Logic
+    function filterMonth(month, btnElement) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+      else document.querySelector('.filter-btn').classList.add('active');
+
+      if (month === 'All') renderCards(memories);
+      else renderCards(memories.filter(m => m.month === month));
+    }
+
+    // --- 2. FLOATING HEARTS ANIMATION ---
+    const canvas = document.getElementById('heart-canvas');
+    const ctx = canvas.getContext('2d');
+    let hearts = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Heart {
+      constructor(x, y) {
+        this.x = x || Math.random() * canvas.width;
+        this.y = y || canvas.height + Math.random() * 50;
+        this.size = Math.random() * 16 + 12;
+        this.speedY = Math.random() * 2 + 1;
+        this.speedX = Math.random() * 2 - 1;
+        this.opacity = 1;
+      }
+      draw() {
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = '#ff758f';
+        ctx.font = `${this.size}px serif`;
+        ctx.fillText('♥', this.x, this.y);
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX;
+        this.opacity -= 0.008;
+      }
+    }
+
+    function triggerHeartBurst(x, y) {
+      for (let i = 0; i < 12; i++) {
+        hearts.push(new Heart(x, y));
+      }
+    }
+
+    function animateHearts() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hearts.forEach((h, index) => {
+        h.update();
+        h.draw();
+        if (h.opacity <= 0) hearts.splice(index, 1);
+      });
+      requestAnimationFrame(animateHearts);
+    }
+    animateHearts();
+
+    // --- 3. AUTO-PLAY & AUDIO CONTROLS ---
+    const music = document.getElementById('bg-music');
+    const playBtn = document.getElementById('play-btn');
+
+    function startMusic() {
+      music.play().then(() => {
+        playBtn.innerText = '❚❚';
+      }).catch(() => {
+        // Fallback for strict browser autoplay rules
+        playBtn.innerText = '▶';
+      });
+    }
+
+    // Attempt autoplay immediately
+    startMusic();
+
+    // Browser safeguard: ensure music starts on her very first tap/click on the page
+    document.body.addEventListener('click', () => {
+      if (music.paused) {
+        startMusic();
+      }
+    }, { once: true });
+
+    playBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // prevent triggering body click listener
+      if (music.paused) {
+        music.play();
+        playBtn.innerText = '❚❚';
+      } else {
+        music.pause();
+        playBtn.innerText = '▶';
+      }
+    });
+
+    // Initial render
+    renderCards(memories);
+  </script>
+</body>
+</html>
